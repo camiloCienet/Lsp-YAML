@@ -1,7 +1,11 @@
 import log from "./log"
 import initializeMethod from "./methods/initialize";
+import { RequestMessage } from "./types";
 
-
+type Method = (message:RequestMessage ) => object;
+const lookUpMethod: Record<string, Method> = {
+  initialize: initializeMethod
+}
 let buffer = "";
 process.stdin.on("data",(chunk)=>{
 
@@ -31,7 +35,13 @@ process.stdin.on("data",(chunk)=>{
     // Write to file
     log.write({id:message.id , method:message.method})
 
-    // Enter method 
+    // Go find the method we need in the lookUpMethod oject 
+    const method = lookUpMethod[message.method]
+
+    //Respond to client with the specific method if exists
+    if (method){
+      response(method(message))
+    }
 
     // Remover processed message from buffer  "" so it can break from the program
     buffer = buffer.slice(messgStart + lenght)
